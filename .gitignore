@@ -1,2 +1,5 @@
 env
-.mk
+*.mk
+*.mp4
+*.png
+__pycache__

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Smart mirror</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='materialize.min.css') }}">
+    <style media="screen">
+      .status-mk{
+        margin-bottom:2px;
+        height:100px;
+      }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="container">
+        <div class="row">
+          <div class="col s12 center">
+            <h4>Espacios de estacionamiento</h4>
+          </div>
+            <div class="col s12">
+                <div class="card">
+                  <div class="card-content">
+                      <div class="row">
+                        <template v-for="esp in espacios">
+                          <div v-if="esp == 1"
+                          class="col m5 offset-m1 s12 red status-mk">Ocupado</div>
+                          <div v-else class="col m5 offset-m1 s12 green status-mk">
+                            Libre
+                          </div>
+                        </template>
+                      </div>
+                  </div>
+                </div>
+            </div>
+            <div class="col s12">
+              <!-- <img class="responsive-img" width="300" src="{{dominio_stream}}" style="border-radius:70px;"> -->
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='materialize.min.js')}}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.3/vue.min.js"></script>
+
+    <script>
+        var socket = io.connect('{{domain}}')
+
+        var vm = new Vue({
+            el: "#app",
+            delimiters:['[[',']]'],
+            data() {
+                return {
+                    espacios: []
+                }
+            },
+            methods: {
+            },
+        })
+
+        socket.on('connect',function(){
+            console.log("conectado al socket");
+            socket.emit('espacios',{
+                channel: ""
+            })
+        })
+
+        socket.on('recibido_espacios',function(mjs){
+            vm.espacios = mjs.espacios
+            console.log(mjs.espacios);
+        })
+    </script>
+</body>
+</html>

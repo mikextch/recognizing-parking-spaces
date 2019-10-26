@@ -10,7 +10,7 @@ with open ('vidCrs1.mk', 'rb') as fp:
 
 coordinates = coordinates
 coordinatesToShow = coordinates
-
+frame = ''
 
 def drop_irregular_image(image_, roi_corners):
     # original image
@@ -79,42 +79,54 @@ def crop_image_white_back():
     exit()
 
 
-while(cap.isOpened()):
-    ret, frame = cap.read()
+def recognize():
+    global frame
+    while(cap.isOpened()):
+        ret, frame = cap.read()
 
-    #out.write(frame)
+        #out.write(frame)
+        if not ret:
+            print("fin video")
+            break
 
-    img_canny = cv2.Canny(frame, 100, 200)
+        img_canny = cv2.Canny(frame, 100, 200)
 
-    img_gray = cv2.cvtColor(img_canny, cv2.COLOR_BAYER_BG2GRAY)
+        img_gray = cv2.cvtColor(img_canny, cv2.COLOR_BAYER_BG2GRAY)
 
-    (thresh, img) = cv2.threshold(img_canny, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        (thresh, img) = cv2.threshold(img_canny, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
-    spots = []
-    rowAshow = coordinatesToShow
+        spots = []
+        rowAshow = coordinatesToShow
 
-    i = 0
-    for item in coordinates:
-        row = "A"
-        pts = np.array([[
-            (rowAshow[i][0], rowAshow[i][1]),
-            (rowAshow[i][2], rowAshow[i][3]),
-            (rowAshow[i][4], rowAshow[i][5]),
-            (rowAshow[i][6], rowAshow[i][7])]], dtype=np.int32)
-        # print(img[(item[0]+item[1]) : (item[2]+item[3]), (item[4]+item[5]) : (item[6]+item[7]) ])
-        imgCrop = drop_irregular_image(img, pts)
-        non = cv2.countNonZero(imgCrop)
-        if non < 200:
-            cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
-        else:
-            cv2.polylines(frame, [pts], True, (0, 0, 255), 2)
+        i = 0
+        for item in coordinates:
+            row = "A"
+            pts = np.array([[
+                (rowAshow[i][0], rowAshow[i][1]),
+                (rowAshow[i][2], rowAshow[i][3]),
+                (rowAshow[i][4], rowAshow[i][5]),
+                (rowAshow[i][6], rowAshow[i][7])]], dtype=np.int32)
+            # print(img[(item[0]+item[1]) : (item[2]+item[3]), (item[4]+item[5]) : (item[6]+item[7]) ])
+            imgCrop = drop_irregular_image(img, pts)
+            non = cv2.countNonZero(imgCrop)
+            if non < 200:
+                cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
+            else:
+                cv2.polylines(frame, [pts], True, (0, 0, 255), 2)
 
-        i += 1
+            i += 1
 
-    cv2.imshow('frame', frame)
-    
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        cv2.imshow('frame', frame)
 
-cap.release()
-cv2.destroyAllWindows()
+        ########################### PARA PASAR COMO STREAMING
+        # i, framk = cv2.imencode('.jpeg',frame)
+        # yield (b'--frame\r\n'
+        #         b'Content-Type: image/jpeg\r\n\r\n' + framk.tobytes() + b'\r\n')
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+recognize()

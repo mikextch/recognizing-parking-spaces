@@ -3,6 +3,7 @@ import numpy as np
 import pickle
 import logging
 import sys
+import os
 from roipoly import MultiRoi
 from matplotlib import pyplot as plt
 
@@ -21,7 +22,7 @@ logging.basicConfig(format='%(levelname)s ''%(processName)-10s : %(asctime)s '
 
 n_arg = len(sys.argv)
 # Comprobar que no sea un nuevo
-if n_arg==1:
+if n_arg==1 and os.path.exists("vidCrs1.mk"):
     #Comprobar si hay puntos anteriores
     with open ('vidCrs1.mk', 'rb') as fp:
         rois = pickle.load(fp)
